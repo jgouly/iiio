@@ -1,30 +1,30 @@
-require 'socket'
+require 'socket';require 'util'
 @socket = TCPSocket.new ARGV[0], 6667
-["NICK #{ARGV[1]}", "USER #{ARGV[1]} 0 * :iiio user", "JOIN #{ARGV[2]}"].each { |msg| @socket.puts msg }
-@server_f = File.open ARGV[0], "a"
+@server_f = open ARGV[0], "a"
+["NICK #{ARGV[1]}", "USER #{ARGV[1]} 0 * :iiio user", "JOIN #{ARGV[2]}"].each { |msg| log msg, @socket }
 
 while input = select([@socket, STDIN], nil, nil)
   input[0].each do |i|
     if i == @socket
-      line=@socket.gets
+      log line = @socket.gets, @server_f
       case line
         when /^PING :(.+)$/i: @socket.puts "PONG :#{$1}"
         when /:([^!]*)![^ ].* +PRIVMSG ([^ :]+) +:(.*)/:
 	  m, nick, target, msg = *line.match(/:([^!]*)![^ ].* +PRIVMSG ([^ :]+) +:(.*)/)
 	  if m
 	    if action = msg[/^\001ACTION(.+)\001/, 1]
-	      @server_f.puts "#{Time.now.strftime("%d/%m/%y %H:%M:%S")} * #{nick}#{action}"
+	      log_m "#{target} * #{nick}#{action}", @server_f
 	    else
-	      @server_f.puts "#{Time.now.strftime("%d/%m/%y %H:%M:%S")} #{target} <#{nick}> #{msg}"
+	      log_m "#{target} <#{nick}> #{msg}", @server_f
   	    end 
 	  else
-	    @server_f.puts line
+	    log line, @server_f
 	  end
       end
     else
-      @socket.puts STDIN.gets
+      log STDIN.gets, @socket
     end
   end
 @server_f.flush
 end
-server_f.close
+@server_f.close
