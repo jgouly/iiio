@@ -8,13 +8,18 @@ end
 
 def handle_input(input)
 	case input
-		when /^privmsg ([^\s]+) (.+)/i: log "PRIVMSG #{channel_name $1} :#{$2}", @socket
+		when /^(privmsg|>) ([^\s]+) (.+)/i: log "PRIVMSG #{channel_name $2} :#{$3}", @socket
 		when /^me (.+) (.*)/i: log "PRIVMSG #{channel_name $1} :\001ACTION #{$2}\001", @socket
 		when /^(j|p) (.+)/i:   log "#{join_part $1, channel_name($2)} #{channel_name $2}", @socket
 		when /^chans/: log @channels.values.join(", "), @server_f
 		when /^alias ([^\s]+) ([^\s]+)/: @channel_aliases[$1] = channel_name $2
+		when /^&(.*)/: @bind_mode = channel_name $1.strip
 	else
-		log input, @socket
+		if @bind_mode
+			log "PRIVMSG #{@bind_mode} :#{input}", @socket
+		else
+			log input, @socket
+		end
 	end
 end
 
@@ -37,6 +42,7 @@ def channel_name(name)
   case name 
 		when /^#/: name
 		when /^(\d+)$/: @channels[$1.to_i]
+		when '': nil
 		else @channel_aliases[name] || "##{name}"
 	end
 end

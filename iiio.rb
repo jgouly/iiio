@@ -1,7 +1,7 @@
 require 'socket';require 'util'
 @socket = TCPSocket.new ARGV[0], 6667
 @server_f = open ARGV[0], "a"
-@channels, @channel_aliases = [], {}
+@channels, @channel_aliases, @bind_mode = [], {}
 ["NICK #{ARGV[1]}", "USER #{ARGV[1]} 0 * :iiio user"].each { |msg| log msg, @socket }
 
 while input = select([@socket, STDIN], nil, nil)
@@ -14,5 +14,8 @@ while input = select([@socket, STDIN], nil, nil)
 		end
 	end
 	@server_f.flush
+  if @bind_mode
+		print "> #{@quey_mode}: "
+	end
 end
 @server_f.close
