@@ -9,12 +9,12 @@ while input = select([@socket, STDIN], nil, nil)
 	load 'module.rb'
 	input[0].each do |i|
 		if i == @socket
-			handle_output @socket.gets.strip
+			handle_output @socket.gets
 		else
 			if @bind_mode
 				print "[#{@bind_mode}] "
 			end
-			handle_input STDIN.gets.strip
+			handle_input STDIN.gets
 		end
 	end
 	@server_f.flush

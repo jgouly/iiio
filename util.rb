@@ -7,10 +7,14 @@ def log_m(target, msg, out)
 end
 
 def handle_input(input)
-	case input
-		when /(\S+)(.*)/: run_modules $1, $2.split(/\s/) 
+	if input =~ /^(\S+)\s(.*)/ && @modules[$1]
+		run_modules $1, $2.split(/\s/)
 	else
-		log input, @socket
+		if @bind_mode
+			puts 'bind_mode, feg'
+		else
+			puts "err, right"
+		end
 	end
 end
 
@@ -33,11 +37,7 @@ def channel_name(name)
   case name 
 		when /^#/: name
 		when /^(\d+)$/: @channels[$1.to_i]
-		when '': nil
+		when '', nil: nil
 		else @channel_aliases[name] || "##{name}"
 	end
-end
-
-def _r(regex)
-	/^#{@bind_mode ? "/" : "[\/]?" }#{regex}$/i 
 end

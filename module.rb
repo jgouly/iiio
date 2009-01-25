@@ -5,13 +5,14 @@ def register_module(event, *catch)
 end
 
 def run_modules(cmd, args)
-	args.delete("")
-	modules = @modules.find_all{|k,v| cmd == k}
-	modules.each do |reg, event|
-		send(event, *args)
-	end
-	if modules.empty? and @bind_mode
+	prefix, command = cmd[/^(\/)?(.+)/,1], $2
+	if @bind_mode and !prefix
 		handle_privmsg(@bind_mode,[cmd, *args])
+	else
+		modules = @modules.find_all{|k,v| command == k}
+		modules.each do |reg, event|
+			send(event, *args)
+		end
 	end
 end
 
@@ -35,6 +36,10 @@ end
 
 register_module :handle_action, 'me'
 def handle_action(target, *args)
+	if @bind_mode
+		args.unshift target
+		target = @bind_mode
+	end
 	log "PRIVMSG #{channel_name target} :\001ACTION #{args.join ' '}\001", @socket
 end
 
