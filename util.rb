@@ -8,18 +8,9 @@ end
 
 def handle_input(input)
 	case input
-		when _r(/(privmsg|>) ([^\s]+) (.+)/): log "PRIVMSG #{target = channel_name $2} :#{$3}", @socket; log_m target, "<#{@nick}> #{$3}", @server_f 
-		when _r(/me (.+) (.*)/): log "PRIVMSG #{channel_name $1} :\001ACTION #{$2}\001", @socket
-		when _r(/(j|p) (.+)/):   log "#{join_part $1, channel_name($2)} #{channel_name $2}", @socket
-		when _r(/chans/): log @channels.values.join(", "), @server_f
-		when _r(/alias ([^\s]+) ([^\s]+)/): @channel_aliases[$1] = channel_name $2
-		when _r(/&(.*)/): @bind_mode = channel_name $1.strip
+		when /(\S+)(.*)/: run_modules $1, $2.split(/\s/) 
 	else
-		if @bind_mode
-			log "PRIVMSG #{@bind_mode} :#{input}", @socket
-		else
-			log input, @socket
-		end
+		log input, @socket
 	end
 end
 
@@ -47,16 +38,6 @@ def channel_name(name)
 	end
 end
 
-def join_part(join_part, channel)
-	if join_part == 'j'
-		@channels.push channel
-		'JOIN'	
-	else
-		@channels.delete channel
-		'PART'
-	end
-end
-
 def _r(regex)
-	/^#{@bind_mode ? "/" : "[\/]?" }#{regex}/i 
+	/^#{@bind_mode ? "/" : "[\/]?" }#{regex}$/i 
 end

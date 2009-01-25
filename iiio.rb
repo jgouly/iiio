@@ -1,4 +1,4 @@
-require 'socket';require 'util'
+require 'socket';require 'util';require 'module'
 @socket = TCPSocket.new ARGV[0], 6667
 @server_f = open ARGV[0], "a"
 @channels, @channel_aliases, @bind_mode = [], {}
@@ -6,16 +6,17 @@ require 'socket';require 'util'
 
 while input = select([@socket, STDIN], nil, nil)
 	load 'util.rb'
+	load 'module.rb'
 	input[0].each do |i|
 		if i == @socket
 			handle_output @socket.gets.strip
 		else
+			if @bind_mode
+				print "[#{@bind_mode}] "
+			end
 			handle_input STDIN.gets.strip
 		end
 	end
 	@server_f.flush
-  if @bind_mode
-		print ">#{@bind_mode}: "
-	end
 end
 @server_f.close
