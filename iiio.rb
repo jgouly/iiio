@@ -1,12 +1,12 @@
-require 'socket';require 'util';require 'module'
+require 'socket';require 'readline';require 'util';require 'input_module'
 @socket = TCPSocket.new ARGV[0], 6667
 @server_f = open ARGV[0], "a"
 @channels, @channel_aliases, @bind_mode = [], {}
 ["NICK #{@nick = ARGV[1]}", "USER #{ARGV[1]} 0 * :iiio user"].each { |msg| log msg, @socket }
 
-while input = select([@socket, STDIN], nil, nil)
+while input = select([@socket, $stdin],nil, nil)
 	load 'util.rb'
-	load 'module.rb'
+	load 'input_module.rb'
 	input[0].each do |i|
 		if i == @socket
 			handle_output @socket.gets

@@ -7,11 +7,11 @@ def log_m(target, msg, out)
 end
 
 def handle_input(input)
-	if input =~ /^(\S+)\s(.*)/ && @modules[$1]
-		run_modules $1, $2.split(/\s/)
+	if input =~ /^(\S+)\s(.*)/ and is_input_module? $1
+		run_input_modules $1, $2.split(/\s/)
 	else
 		if @bind_mode
-			puts 'bind_mode, feg'
+			handle_privmsg @bind_mode, input	
 		else
 			puts "err, right"
 		end
